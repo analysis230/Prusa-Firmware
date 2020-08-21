@@ -146,9 +146,13 @@ extern void menu_format_sheet_E(const Sheet &sheet_E, SheetFormatBuffer &buffer)
 
 
 #define MENU_ITEM_EDIT_int3_P(str, pval, minval, maxval) do { if (menu_item_edit_P(str, pval, minval, maxval)) return; } while (0)
+#define MENU_ITEM_EDIT_mesh_P(str, pval, minval, maxval) do { if (menu_item_edit_mesh_P(str, pval, minval, maxval)) return; } while (0)
+
 //#define MENU_ITEM_EDIT_int3_P(str, pval, minval, maxval) MENU_ITEM_EDIT(int3, str, pval, minval, maxval)
 template <typename T>
 extern uint8_t menu_item_edit_P(const char* str, T pval, int16_t min_val, int16_t max_val);
 
+template <typename T>
+extern uint8_t menu_item_edit_mesh_P(const char* str, T pval, int16_t min_val, int16_t max_val);
 
 #endif //_MENU_H

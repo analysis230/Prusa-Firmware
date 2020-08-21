@@ -434,6 +434,7 @@ uint8_t menu_item_gcode_P(const char* str, const char* str_gcode)
 }
 
 const char menu_fmt_int3[] PROGMEM = "%c%.15S:%s%3d";
+const char menu_fmt_str[] PROGMEM = "%c%.15S:%s%s";
 
 const char menu_fmt_float31[] PROGMEM = "%-12.12S%+8.1f";
 
@@ -467,6 +468,32 @@ void menu_draw_P<uint8_t*>(char chr, const char* str, int16_t val)
     {
         lcd_printf_P(menu_fmt_float13, chr, str, factor);
     }
+}
+
+template<typename T>
+static void menu_draw_mesh_P(char chr, const char* str, int16_t val);
+
+template<>
+void menu_draw_mesh_P<int16_t*>(char chr, const char* str, int16_t val)
+{
+	int text_len = strlen_P(str);
+	if (text_len > 15) text_len = 15;
+	char spaces[LCD_WIDTH + 1] = {0};
+    memset(spaces,' ', LCD_WIDTH);
+
+	if (val >= -100 && val <= 100)
+	{
+		if (val <= -100) spaces[15 - text_len - 1] = 0;
+		else spaces[15 - text_len] = 0;
+		lcd_printf_P(menu_fmt_int3, chr, str, spaces, val);
+	}
+	else
+	{
+		spaces[15 - text_len] = 0;
+		char interpolated[4] = "INT";
+		lcd_printf_P(menu_fmt_str, chr, str, spaces, interpolated);
+	}
+	
 }
 
 //! @brief Draw up to 10 chars of text and a float number in format from +0.0 to +12345.0. The increased range is necessary
@@ -543,7 +570,36 @@ uint8_t menu_item_edit_P(const char* str, T pval, int16_t min_val, int16_t max_v
 	return 0;
 }
 
+
+template <typename T>
+uint8_t menu_item_edit_mesh_P(const char* str, T pval, int16_t min_val, int16_t max_val)
+{
+	menu_data_edit_t* _md = (menu_data_edit_t*)&(menu_data[0]);
+	if (menu_item == menu_line)
+	{
+		if (lcd_draw_update) 
+		{
+			lcd_set_cursor(0, menu_row);
+			menu_draw_mesh_P<T>(menu_selection_mark(), str, *pval);
+		}
+		if (menu_clicked && (lcd_encoder == menu_item))
+		{
+			menu_submenu_no_reset(_menu_edit_P<T>);
+			_md->editLabel = str;
+			_md->editValue = pval;
+			_md->minEditValue = min_val;
+			_md->maxEditValue = max_val;
+			lcd_encoder = *pval;
+			return menu_item_ret();
+		}
+	}
+	menu_item++;
+	return 0;
+}
+
 template uint8_t menu_item_edit_P<int16_t*>(const char* str, int16_t *pval, int16_t min_val, int16_t max_val);
 template uint8_t menu_item_edit_P<uint8_t*>(const char* str, uint8_t *pval, int16_t min_val, int16_t max_val);
+
+template uint8_t menu_item_edit_mesh_P<int16_t*>(const char* str, int16_t *pval, int16_t min_val, int16_t max_val);
 
 #undef _menu_data
