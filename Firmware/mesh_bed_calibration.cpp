@@ -3132,6 +3132,10 @@ void mbl_settings_init() {
 		mbl_z_probe_nr = 3;
 		eeprom_update_byte((uint8_t*)EEPROM_MBL_PROBE_NR, mbl_z_probe_nr);
 	}
+    if (eeprom_read_byte((uint8_t*)EEPROM_MESH_BED_CORRECTION_VALID) == 0xFF)
+    {
+        eeprom_update_byte((uint8_t*)EEPROM_MESH_BED_CORRECTION_VALID, 0);
+    }
 }
 
 //parameter ix: index of mesh bed leveling point in X-axis (for meas_points == 7 is valid range from 0 to 6; for meas_points == 3 is valid range from 0 to 2 )  

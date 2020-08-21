@@ -5,7 +5,7 @@
 #include <inttypes.h>
 #include "eeprom.h"
 
-#define MENU_DATA_SIZE      32
+#define MENU_DATA_SIZE      128
 
 //Function pointer to menu functions.
 typedef void (*menu_func_t)(void);

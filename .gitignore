@@ -2,6 +2,7 @@
 .project
 .cproject
 Debug
+out/
 Firmware/Configuration_prusa.h
 Firmware/Doc
 /Firmware/.vs/Firmware/v14
