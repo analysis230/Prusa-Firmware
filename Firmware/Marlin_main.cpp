@@ -797,7 +797,7 @@ int uart_putchar(char c, FILE *)
 void lcd_splash()
 {
 	lcd_clear(); // clears display and homes screen
-	lcd_puts_P(PSTR("\n Original Prusa i3\n   Prusa Research"));
+	lcd_puts_P(PSTR("\n Create Inc (TM) \n Prusa i3 mk3s"));
 }
 
 
@@ -5237,12 +5237,51 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
 			mbl_interpolation(nMeasPoints);
 		}
 
+    //below commands were being used for debugging
+    /*SERIAL_PROTOCOLPGM("Num X,Y: ");
+    SERIAL_PROTOCOL(MESH_NUM_X_POINTS);
+    SERIAL_PROTOCOL(',');
+    SERIAL_PROTOCOL(MESH_NUM_Y_POINTS);
+    SERIAL_PROTOCOLPGM("\nZ search height: ");
+    SERIAL_PROTOCOL(MESH_HOME_Z_SEARCH);
+    SERIAL_PROTOCOLLNPGM("\nMeasured points:");
+    for (int y = MESH_NUM_Y_POINTS-1; y >= 0; y--) {
+        for (int x = 0; x < MESH_NUM_X_POINTS; x++) {
+            SERIAL_PROTOCOLPGM("  ");
+            SERIAL_PROTOCOL_F(mbl.z_values[y][x], 5);
+        }
+        SERIAL_PROTOCOLLN();
+    }*/
+
     if (nMeasPoints == 7 && eeprom_read_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID)) {
 			mbl_correction(nMeasPoints);
 		}
 
+    //Below commands were being used for debugging
+    /*SERIAL_PROTOCOLPGM("Num X,Y: ");
+    SERIAL_PROTOCOL(MESH_NUM_X_POINTS);
+    SERIAL_PROTOCOL(',');
+    SERIAL_PROTOCOL(MESH_NUM_Y_POINTS);
+    SERIAL_PROTOCOLPGM("\nZ search height: ");
+    SERIAL_PROTOCOL(MESH_HOME_Z_SEARCH);
+    SERIAL_PROTOCOLLNPGM("\nMeasured points:");
+    for (int y = MESH_NUM_Y_POINTS-1; y >= 0; y--) {
+        for (int x = 0; x < MESH_NUM_X_POINTS; x++) {
+            SERIAL_PROTOCOLPGM("  ");
+            SERIAL_PROTOCOL_F(mbl.z_values[y][x], 5);
+        }
+        SERIAL_PROTOCOLLN();
+    }
 
-
+    SERIAL_PROTOCOLPGM("\nZ saved points: ");
+    for (int i = 0; i < 49; i++)
+    {
+      int8_t correction = eeprom_read_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + i);
+      float cor = float(correction) * 0.001f;
+      SERIAL_PROTOCOLPGM("  ");
+      SERIAL_PROTOCOL_F(cor, 4);
+    }
+    SERIAL_PROTOCOLLN();*/
 /*
 		        SERIAL_PROTOCOLPGM("Num X,Y: ");
                 SERIAL_PROTOCOL(MESH_NUM_X_POINTS);

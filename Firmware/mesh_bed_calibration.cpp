@@ -3200,7 +3200,7 @@ void mbl_interpolation(uint8_t meas_points) {
 
 float get_mbl_correction(uint8_t ix, uint8_t iy, uint8_t meas_points)
 {
-    uint8_t nPoint = 6*iy + ix;
+    int8_t nPoint = meas_points * iy + ix;
     //float offset = float(correction) * 0.001f;
     int8_t correction = eeprom_read_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + nPoint);
     float offset = float(correction) * 0.001f;
@@ -3210,7 +3210,7 @@ float get_mbl_correction(uint8_t ix, uint8_t iy, uint8_t meas_points)
 
 bool get_mbl_correction_interpolate(uint8_t ix, uint8_t iy, uint8_t meas_points)
 {
-    uint8_t nPoint = 6*iy + ix;
+    int8_t nPoint = meas_points * iy + ix;
     int8_t correction = eeprom_read_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + nPoint);
 
     bool interpolate = (correction > BED_ADJUSTMENT_UM_MAX || correction < -BED_ADJUSTMENT_UM_MAX);
@@ -3234,7 +3234,7 @@ void mbl_correction(uint8_t meas_points)
             }
             else
             {
-                mbl.z_values[y][x] = mbl.z_values[y][x] - get_mbl_correction(x,y,meas_points);
+                mbl.z_values[y][x] = mbl.z_values[y][x] + get_mbl_correction(x,y,meas_points);
             }
             
 		}

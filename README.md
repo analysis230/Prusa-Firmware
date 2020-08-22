@@ -1,3 +1,26 @@
+# Only tested on Prusa i3 mk3s as of yet
+# Only written for language mode 0 i.e. primary language
+
+I added a mesh bed leveling correction feature.
+I was facing a lot of trouble with one or two points on my bed being measured way off by the PINDA probe. 
+I added a feature to be able to correct each point inividually by + or - 100 microns or set it to interpolated.
+
+![](../readme_files/Prints_before_and_after.jpg)
+
+This was the problem. if you look at the left middle point (point [0,3]), the probe reading was too high and the bed actually wasn't that high, so my prints wouldn't stick at that particualr point. after correction, the bed looks much better
+
+![](../readme_files/Create_Inc_Addons_Screenshot.jpg)
+
+INT here means that the value of this points would be interpolated from the nearby points. you can otherwise increase or decrease the zoffset by -100 to 100 microns. 101 or -101 would be interpretaed as interpolated.
+
+
+![](../readme_files/Prints_before_and_after.jpg)
+
+Prints, before and after
+
+Building steps are the same as the original firmware as written below.
+Additionally, you can also use platformio to build this firmware. platformio.ini file is included in the root directory.
+
 # Prusa Firmware MK3
 
 This repository contains the source code and the development versions of the firmware running on the [Original Prusa i3](https://prusa3d.com/) MK3S/MK3/MK2.5S/MK2.5 line of printers.
@@ -5,7 +28,6 @@ This repository contains the source code and the development versions of the fir
 The latest official builds can be downloaded from [Prusa Drivers](https://www.prusa3d.com/drivers/). Pre-built development releases are also [available here](https://github.com/prusa3d/Prusa-Firmware/releases).
 
 The firmware for the Original Prusa i3 printers is proudly based on [Marlin 1.0.x](https://github.com/MarlinFirmware/Marlin/) by Scott Lahteine (@thinkyhead) et al. and is distributed under the terms of the [GNU GPL 3 license](LICENSE).
-
 
 # Table of contents
 

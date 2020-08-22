@@ -1,6 +1,8 @@
 .settings
 .project
 .cproject
+.idea/
+.vscode/
 Debug
 out/
 Firmware/Configuration_prusa.h
