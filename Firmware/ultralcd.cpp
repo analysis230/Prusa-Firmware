@@ -5755,11 +5755,6 @@ void lcd_hw_setup_menu(void)                      // can not be "static"
     MENU_END();
 }
 
-void mesh_bed_level_correction_valid_set() {
-	bool mesh_bed_level_correction_valid = eeprom_read_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID);
-	mesh_bed_level_correction_valid = !mesh_bed_level_correction_valid;
-	eeprom_update_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID, mesh_bed_level_correction_valid);
-}
 
 typedef struct
 {
@@ -5768,6 +5763,26 @@ typedef struct
 	int16_t point[49];
 } _menu_data_mesh_bed_correction_t;
 static_assert(sizeof(menu_data)>= sizeof(_menu_data_mesh_bed_correction_t),"_menu_data_mesh_bed_correction_t doesn't fit into menu_data");
+
+
+void mesh_bed_level_correction_reset()
+{
+	for (int8_t i = 0; i < 49; i++)
+	{
+		eeprom_update_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + i, 0);
+	}
+	_menu_data_mesh_bed_correction_t* _md = (_menu_data_mesh_bed_correction_t*)&(menu_data[0]);
+	_md->status = 0;
+}
+
+void mesh_bed_level_correction_valid_set() {
+	bool mesh_bed_level_correction_valid = eeprom_read_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID);
+	mesh_bed_level_correction_valid = !mesh_bed_level_correction_valid;
+	eeprom_update_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID, mesh_bed_level_correction_valid);
+	mesh_bed_level_correction_reset();
+	//_menu_data_mesh_bed_correction_t* _md = (_menu_data_mesh_bed_correction_t*)&(menu_data[0]);
+	//_md->status = 0;
+}
 
 template <uint8_t pointNumber>
 static void mesh_point_correction_menu()
@@ -5801,6 +5816,13 @@ static void mesh_bed_level_correction_menu()
 	}
 
 	MENU_BEGIN();
+
+	ON_MENU_LEAVE(
+		for (int8_t i = 0; i < 49; i++)
+			{
+				eeprom_update_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + i, _md->point[i] );
+			}
+	);
 	MENU_ITEM_BACK_P(_i("Create Inc Addons"));
 	MENU_ITEM_TOGGLE_P(_i("Correction"),  eeprom_read_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID) ? _T(MSG_ON) : _T(MSG_OFF), mesh_bed_level_correction_valid_set);
 
@@ -5808,55 +5830,56 @@ static void mesh_bed_level_correction_menu()
 	{
 		if (MESH_NUM_X_POINTS == 7 & MESH_NUM_Y_POINTS == 7)
 		{
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 1 [um]"),  &_md->point[0],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 2 [um]"),  &_md->point[1],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 3 [um]"),  &_md->point[2],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 4 [um]"),  &_md->point[3],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 5 [um]"),  &_md->point[4],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 6 [um]"),  &_md->point[5],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 7 [um]"),  &_md->point[6],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 8 [um]"),  &_md->point[7],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 9 [um]"),  &_md->point[8],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 10 [um]"),  &_md->point[9],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 11 [um]"),  &_md->point[10],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 12 [um]"),  &_md->point[11],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 13 [um]"),  &_md->point[12],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 14 [um]"),  &_md->point[13],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 15 [um]"),  &_md->point[14],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 16 [um]"),  &_md->point[15],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 17 [um]"),  &_md->point[16],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 18 [um]"),  &_md->point[17],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 19 [um]"),  &_md->point[18],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 20 [um]"),  &_md->point[19],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 21 [um]"),  &_md->point[20],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 22 [um]"),  &_md->point[21],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 23 [um]"),  &_md->point[22],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 24 [um]"),  &_md->point[23],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 25 [um]"),  &_md->point[24],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 26 [um]"),  &_md->point[25],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 27 [um]"),  &_md->point[26],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 28 [um]"),  &_md->point[27],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 29 [um]"),  &_md->point[28],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 30 [um]"),  &_md->point[29],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 31 [um]"),  &_md->point[30],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 32 [um]"),  &_md->point[31],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 33 [um]"),  &_md->point[32],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 34 [um]"),  &_md->point[33],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 35 [um]"),  &_md->point[34],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 36 [um]"),  &_md->point[35],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 37 [um]"),  &_md->point[36],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 38 [um]"),  &_md->point[37],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 39 [um]"),  &_md->point[38],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 40 [um]"),  &_md->point[39],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 41 [um]"),  &_md->point[40],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 42 [um]"),  &_md->point[41],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 43 [um]"),  &_md->point[42],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 44 [um]"),  &_md->point[43],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 45 [um]"),  &_md->point[44],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 46 [um]"),  &_md->point[45],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 47 [um]"),  &_md->point[46],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 48 [um]"),  &_md->point[47],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
-			 MENU_ITEM_EDIT_mesh_P(_i("Point 49 [um]"),  &_md->point[48],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,0] [um]"),  &_md->point[0],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,0] [um]"),  &_md->point[1],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,0] [um]"),  &_md->point[2],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,0] [um]"),  &_md->point[3],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,0] [um]"),  &_md->point[4],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,0] [um]"),  &_md->point[5],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,0] [um]"),  &_md->point[6],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,1] [um]"),  &_md->point[7],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,1] [um]"),  &_md->point[8],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,1] [um]"),  &_md->point[9],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,1] [um]"),  &_md->point[10],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,1] [um]"),  &_md->point[11],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,1] [um]"),  &_md->point[12],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,1] [um]"),  &_md->point[13],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,2] [um]"),  &_md->point[14],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,2] [um]"),  &_md->point[15],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,2] [um]"),  &_md->point[16],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,2] [um]"),  &_md->point[17],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,2] [um]"),  &_md->point[18],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,2] [um]"),  &_md->point[19],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,2] [um]"),  &_md->point[20],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,3] [um]"),  &_md->point[21],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,3] [um]"),  &_md->point[22],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,3] [um]"),  &_md->point[23],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,3] [um]"),  &_md->point[24],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,3] [um]"),  &_md->point[25],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,3] [um]"),  &_md->point[26],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,3] [um]"),  &_md->point[27],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,4] [um]"),  &_md->point[28],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,4] [um]"),  &_md->point[29],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,4] [um]"),  &_md->point[30],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,4] [um]"),  &_md->point[31],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,4] [um]"),  &_md->point[32],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,4] [um]"),  &_md->point[33],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,4] [um]"),  &_md->point[34],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,5] [um]"),  &_md->point[35],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,5] [um]"),  &_md->point[36],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,5] [um]"),  &_md->point[37],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,5] [um]"),  &_md->point[38],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,5] [um]"),  &_md->point[39],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,5] [um]"),  &_md->point[40],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,5] [um]"),  &_md->point[41],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [0,6] [um]"),  &_md->point[42],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [1,6] [um]"),  &_md->point[43],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [2,6] [um]"),  &_md->point[44],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [3,6] [um]"),  &_md->point[45],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [4,6] [um]"),  &_md->point[46],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [5,6] [um]"),  &_md->point[47],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1);
+			MENU_ITEM_EDIT_mesh_P(_i("Point [6,6] [um]"),  &_md->point[48],  -BED_ADJUSTMENT_UM_MAX - 1, BED_ADJUSTMENT_UM_MAX + 1); 
+			MENU_ITEM_FUNCTION_P(_i("Reset"), mesh_bed_level_correction_reset);
 		}
 		else
 		{

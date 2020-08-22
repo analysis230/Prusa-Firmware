@@ -3196,3 +3196,8 @@ void mbl_interpolation(uint8_t meas_points) {
 		}
 	}
 }
+
+void mbl_correction(uint8_t meas_points) 
+{
+    
+}

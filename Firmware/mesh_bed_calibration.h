@@ -213,4 +213,5 @@ extern void mbl_settings_init();
 
 extern bool mbl_point_measurement_valid(uint8_t ix, uint8_t iy, uint8_t meas_points, bool zigzag);
 extern void mbl_interpolation(uint8_t meas_points);
+extern void mbl_correction(uint8_t meas_points);
 #endif /* MESH_BED_CALIBRATION_H */

@@ -5236,6 +5236,13 @@ if(eSoundMode!=e_SOUND_MODE_SILENT)
 		if (nMeasPoints == 7 && magnet_elimination) {
 			mbl_interpolation(nMeasPoints);
 		}
+
+    if (nMeasPoints == 7 && eeprom_read_byte((unsigned char *)EEPROM_MESH_BED_CORRECTION_VALID)) {
+			mbl_correction(nMeasPoints);
+		}
+
+
+
 /*
 		        SERIAL_PROTOCOLPGM("Num X,Y: ");
                 SERIAL_PROTOCOL(MESH_NUM_X_POINTS);
