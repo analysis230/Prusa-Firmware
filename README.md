@@ -5,7 +5,7 @@ I added a mesh bed leveling correction feature.
 I was facing a lot of trouble with one or two points on my bed being measured way off by the PINDA probe. 
 I added a feature to be able to correct each point inividually by + or - 100 microns or set it to interpolated.
 
-![](.readme_files/Correction_Graphs.jpg)
+![](./readme_files/Correction_Graphs.jpg)
 
 This was the problem. if you look at the left middle point (point [0,3]), the probe reading was too high and the bed actually wasn't that high, so my prints wouldn't stick at that particualr point. after correction, the bed looks much better
 
