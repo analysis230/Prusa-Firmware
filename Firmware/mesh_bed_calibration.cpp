@@ -7,6 +7,7 @@
 #include "stepper.h"
 #include "ultralcd.h"
 #include "temperature.h"
+#include "util.h"
 
 #ifdef TMC2130
 #include "tmc2130.h"
@@ -3197,7 +3198,45 @@ void mbl_interpolation(uint8_t meas_points) {
 	}
 }
 
+float get_mbl_correction(uint8_t ix, uint8_t iy, uint8_t meas_points)
+{
+    uint8_t nPoint = 6*iy + ix;
+    //float offset = float(correction) * 0.001f;
+    int8_t correction = eeprom_read_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + nPoint);
+    float offset = float(correction) * 0.001f;
+
+    return offset;
+}
+
+bool get_mbl_correction_interpolate(uint8_t ix, uint8_t iy, uint8_t meas_points)
+{
+    uint8_t nPoint = 6*iy + ix;
+    int8_t correction = eeprom_read_int8((unsigned char*)EEPROM_MESH_BED_CORRECTION_N + nPoint);
+
+    bool interpolate = (correction > BED_ADJUSTMENT_UM_MAX || correction < -BED_ADJUSTMENT_UM_MAX);
+    return interpolate;
+}
+
 void mbl_correction(uint8_t meas_points) 
 {
-    
+    for (uint8_t x = 0; x < meas_points; x++) {
+		for (uint8_t y = 0; y < meas_points; y++) {
+
+            if (get_mbl_correction_interpolate(x,y,meas_points))
+            {
+                uint8_t count = 0;
+                float z = 0;
+                if (!get_mbl_correction_interpolate(x, y + 1, meas_points)) { z += mbl.z_values[y + 1][x]; /*printf_P(PSTR("x; y+1: Z = %f \n"), mbl.z_values[y + 1][x]);*/ count++; }
+                if (!get_mbl_correction_interpolate(x, y - 1, meas_points)) { z += mbl.z_values[y - 1][x]; /*printf_P(PSTR("x; y-1: Z = %f \n"), mbl.z_values[y - 1][x]);*/ count++; }
+                if (!get_mbl_correction_interpolate(x + 1, y, meas_points)) { z += mbl.z_values[y][x + 1]; /*printf_P(PSTR("x+1; y: Z = %f \n"), mbl.z_values[y][x + 1]);*/ count++; }
+                if (!get_mbl_correction_interpolate(x - 1, y, meas_points)) { z += mbl.z_values[y][x - 1]; /*printf_P(PSTR("x-1; y: Z = %f \n"), mbl.z_values[y][x - 1]);*/ count++; }
+                if(count != 0) mbl.z_values[y][x] = z / count;
+            }
+            else
+            {
+                mbl.z_values[y][x] = mbl.z_values[y][x] - get_mbl_correction(x,y,meas_points);
+            }
+            
+		}
+	}
 }
