@@ -5,16 +5,16 @@ I added a mesh bed leveling correction feature.
 I was facing a lot of trouble with one or two points on my bed being measured way off by the PINDA probe. 
 I added a feature to be able to correct each point inividually by + or - 100 microns or set it to interpolated.
 
-![](../readme_files/Prints_before_and_after.jpg)
+![](./readme_files/Prints_before_and_after.jpg)
 
 This was the problem. if you look at the left middle point (point [0,3]), the probe reading was too high and the bed actually wasn't that high, so my prints wouldn't stick at that particualr point. after correction, the bed looks much better
 
-![](../readme_files/Create_Inc_Addons_Screenshot.jpg)
+![](./readme_files/Create_Inc_Addons_Screenshot.jpg)
 
 INT here means that the value of this points would be interpolated from the nearby points. you can otherwise increase or decrease the zoffset by -100 to 100 microns. 101 or -101 would be interpretaed as interpolated.
 
 
-![](../readme_files/Prints_before_and_after.jpg)
+![](./readme_files/Prints_before_and_after.jpg)
 
 Prints, before and after
 
